@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Clutch Corporation | Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="https://files.catbox.moe/c0n102.png">
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet"> -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0f0f1a;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+        height: 100vh;
+  width: 100vw;
+  /* https://files.catbox.moe/escvla.png CC-BACKGROUND LINK */
+ background: url('https://files.catbox.moe/escvla.png') no-repeat center center fixed;
+  background-size: 100% 100%;  /* force full width & height */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: transparent;  
+    }
+
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #0f0f1a;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+    } 
+
+ .loader-animation {
+  border: 5px solid #1e1e1e;
+  border-top: 5px solid #ff00e6;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+    canvas#snow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .dashboard {
+      z-index: 2;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+      backdrop-filter: blur(10px);
+      min-width: 320px;
+      max-width: 500px;
+      width: 90%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .dashboard h2 {
+      font-size: 28px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 5px #fff;
+    }
+
+    .dashboard .info {
+      width: 100%;
+    }
+
+    .dashboard .info p {
+      margin: 10px 0;
+      font-size: 18px;
+      text-align: left;
+    }
+
+    .logout-btn {
+      margin-top: 30px;
+      padding: 10px 25px;
+      font-size: 16px;
+      background: #e306eb;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #e60404;
+    }
+  </style>
+</head>
+<body>
+<div id="loader">
+  <div class="loader-animation"></div>
+
+</div>
+    
+  <canvas id="snow"></canvas>
+
+  <div class="dashboard" id="dashboard">
+   <h2 class="typing-text">Welcome to Clutch Corporation</h2>
+    <div class="info">
+      <p><strong>Username:</strong> <span id="username"></span></p>
+      <p><strong>Subscription:</strong> <span id="subscription"></span></p>
+      <p><strong>Expiry:</strong> <span id="expiry"></span></p>
+      <p><strong>IP Address:</strong> <span id="ip"></span></p>
+      <p><strong>Created At:</strong> <span id="createdate"></span></p>
+      <p><strong>Last Login:</strong> <span id="lastlogin"></span></p>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    const isLoggedIn = localStorage.getItem("loggedIn");
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+
+    if (!isLoggedIn || !userData.username) {
+      alert("Session expired or invalid. Redirecting to login.");
+      localStorage.removeItem("loggedIn");
+      window.location.href = "index.html";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("username").innerText = userData.username || "-";
+      document.getElementById("subscription").innerText = userData.subscriptions?.[0]?.subscription || "-";
+      document.getElementById("expiry").innerText = new Date((userData.expires || 0) * 1000).toLocaleString();
+      document.getElementById("ip").innerText = userData.ip || "-";
+      document.getElementById("createdate").innerText = new Date((userData.createdate || 0) * 1000).toLocaleString();
+      document.getElementById("lastlogin").innerText = new Date((userData.lastlogin || 0) * 1000).toLocaleString();
+
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("dashboard").style.display = "flex";
+      }, 1500);
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    window.addEventListener("beforeunload", () => {
+      localStorage.clear();
+    });
+  </script>
+
+  <script>
+    const canvas = document.getElementById("snow");
+    const ctx = canvas.getContext("2d");
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    let snowflakes = [];
+
+    function createSnowflakes() {
+      for (let i = 0; i < 150; i++) {
+        snowflakes.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 4 + 1,
+          d: Math.random() * 2
+        });
+      }
+    }
+
+    function drawSnowflakes() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      for (let i = 0; i < snowflakes.length; i++) {
+        let f = snowflakes[i];
+        ctx.moveTo(f.x, f.y);
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+      }
+      ctx.fill();
+      moveSnowflakes();
+    }
+
+    function moveSnowflakes() {
+      for (let i = 0; i < snowflakes.length; i++) {
+        let f = snowflakes[i];
+        f.y += Math.pow(f.d, 2) + 1;
+        f.x += Math.sin(f.y * 0.01);
+        if (f.y > h) {
+          f.y = 0;
+          f.x = Math.random() * w;
+        }
+      }
+    }
+
+    function animateSnow() {
+      drawSnowflakes();
+      requestAnimationFrame(animateSnow);
+    }
+
+    createSnowflakes();
+    animateSnow();
+
+    window.addEventListener("resize", () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
